@@ -16,7 +16,7 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) for the full system design: the
 dataflow diagram, the UCB1 formulation modified for LLM token budgets,
 and a four-phase production roadmap.
 
-## What's actually verified here, and what isn't
+## Verification
 
 This matters enough to say plainly rather than let a passing test suite
 imply more than it does:
