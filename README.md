@@ -2,7 +2,7 @@
 
 Abhineeth Duddela
 
-[![tests](https://github.com/YOUR_USERNAME/YOUR_REPO_NAME/actions/workflows/tests.yml/badge.svg)](https://github.com/YOUR_USERNAME/YOUR_REPO_NAME/actions/workflows/tests.yml)
+[![tests](https://github.com/abho7/mcts-code-reasoner/actions/workflows/tests.yml/badge.svg)](https://github.com/abho7/mcts-code-reasoner/actions/workflows/tests.yml)
 
 A test-time-compute reasoning engine for code generation: instead of a
 single LLM call producing one attempt, this runs Monte Carlo Tree Search
