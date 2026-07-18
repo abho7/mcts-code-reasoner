@@ -1,0 +1,14 @@
+{
+  "id": "two_sum_indices",
+  "title": "Two Sum (Indices)",
+  "statement": "Given a line of space-separated integers representing an array, and a second line containing a single integer target, print two space-separated 0-indexed indices i j (i < j) such that array[i] + array[j] == target. If multiple valid pairs exist, print the one with the smallest i, then smallest j. It is guaranteed exactly one valid answer exists.\n\nInput format:\nLine 1: space-separated integers (the array)\nLine 2: a single integer (the target)\n\nOutput format:\nTwo space-separated integers: i j",
+  "difficulty": "leetcode_easy",
+  "test_cases": [
+    {"id": "basic_1", "stdin": "2 7 11 15\n9", "expected_stdout": "0 1"},
+    {"id": "basic_2", "stdin": "3 2 4\n6", "expected_stdout": "1 2"},
+    {"id": "duplicate_values", "stdin": "3 3\n6", "expected_stdout": "0 1"},
+    {"id": "negative_numbers", "stdin": "-1 -2 -3 -4 -5\n-8", "expected_stdout": "2 4"},
+    {"id": "target_at_ends", "stdin": "1 2 3 4 5 6 7 8 9 10\n11", "expected_stdout": "0 9"}
+  ],
+  "notes": "A real harness would also generate a large-input stress test (e.g. n=50000) to discriminate an O(n) hash-map solution from an O(n^2) brute force -- omitted here as a static file since it needs to be generated programmatically, not hardcoded. This is also exactly the kind of test a SYNTHESIZE_TEST_CASE action would produce mid-search."
+}
