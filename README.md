@@ -1,5 +1,7 @@
 # MCTS Code Reasoner
 
+Abhineeth Duddela
+
 [![tests](https://github.com/YOUR_USERNAME/YOUR_REPO_NAME/actions/workflows/tests.yml/badge.svg)](https://github.com/YOUR_USERNAME/YOUR_REPO_NAME/actions/workflows/tests.yml)
 
 A test-time-compute reasoning engine for code generation: instead of a
@@ -9,12 +11,6 @@ sandboxed execution environment against real test cases, and feeding
 execution failures (tracebacks, timeouts, wrong output) back into the
 model as a self-reflection step to guide the next attempt.
 
-**The one-sentence version:** UCB1 tree search picks which code draft to
-try next, a real subprocess sandbox with memory/CPU/wall-clock limits
-grades it against test cases, and failures get fed back into the model
-as a targeted "here's exactly what broke" prompt instead of a blind
-retry — verified end-to-end with a scripted buggy-then-fixed model
-response, not just asserted to work.
 
 See [ARCHITECTURE.md](./ARCHITECTURE.md) for the full system design: the
 dataflow diagram, the UCB1 formulation modified for LLM token budgets,
@@ -101,17 +97,3 @@ pytest tests/ -v
 
 See the "Production Repository Structure" section in
 [ARCHITECTURE.md](./ARCHITECTURE.md) for the annotated directory tree.
-
-## What's left to do
-
-- Wire up and validate against a live Ollama/vLLM server (needs a GPU
-  environment with network access)
-- Implement the Phase 2-4 roadmap items from ARCHITECTURE.md: batched
-  concurrent node evaluation, prompt-prefix caching, cross-episode
-  subproblem caching, a warm sandbox worker pool
-- A real benchmark run against a USACO Gold or LeetCode Hard problem set
-  to measure actual solve rate and token cost, not just correctness of
-  the search mechanics
-- Distinct prompt builders for `ADD_HELPER_FUNCTION`, `OPTIMIZE`, and
-  `SYNTHESIZE_TEST_CASE` actions (they currently share `FIX_BUG`'s
-  reflection-style prompt shape as a placeholder)
