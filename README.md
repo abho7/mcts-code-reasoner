@@ -8,7 +8,7 @@ A test-time-compute reasoning engine for code generation: instead of a
 single LLM call producing one attempt, this runs Monte Carlo Tree Search
 over the space of possible code drafts, evaluating each one in a
 sandboxed execution environment against real test cases, and feeding
-execution failures (tracebacks, timeouts, wrong output) back into the
+execution failures through tracebacks, timeouts, wrong output back into the
 model as a self-reflection step to guide the next attempt.
 
 
