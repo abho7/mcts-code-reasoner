@@ -1,5 +1,7 @@
 # MCTS Code Reasoner
 
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 Abhineeth Duddela
 
 [![tests](https://github.com/abho7/mcts-code-reasoner/actions/workflows/tests.yml/badge.svg)](https://github.com/abho7/mcts-code-reasoner/actions/workflows/tests.yml)
