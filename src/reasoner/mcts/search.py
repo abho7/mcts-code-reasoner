@@ -52,7 +52,11 @@ class MCTSSearch:
         max_iterations: int = 64,
         max_tree_depth: int = 12,
         reward_success_threshold: float = 1.0,
+        branching_factor: int = 1,
+        task_mode: str = "stdio",
     ):
+        if branching_factor < 1:
+            raise ValueError("branching_factor must be >= 1")
         self.llm_client = llm_client
         self.executor = executor
         self.problem_statement = problem_statement
@@ -63,11 +67,19 @@ class MCTSSearch:
         self.max_iterations = max_iterations
         self.max_tree_depth = max_tree_depth
         self.reward_success_threshold = reward_success_threshold
+        # branching_factor = k untried actions per expandable node. k=1 makes
+        # the tree a single chain (pure sequential repair), so UCB never has
+        # siblings to choose between; k>=2 is what makes this a real tree search.
+        self.branching_factor = branching_factor
+        self.task_mode = task_mode
 
         self.tokens_spent = 0
         self.iterations_run = 0
         self.root = MCTSNode(state_code="")
-        self.root.untried_actions = [Action(ActionType.GENERATE_INITIAL, "initial full solution attempt")]
+        self.root.untried_actions = [
+            Action(ActionType.GENERATE_INITIAL, f"initial full solution attempt #{i}")
+            for i in range(self.branching_factor)
+        ]
         self.best_node: MCTSNode | None = None
 
     @property
@@ -84,13 +96,14 @@ class MCTSSearch:
 
     async def _generate_action_code(self, node: MCTSNode, action: Action) -> tuple[str, int]:
         if action.action_type == ActionType.GENERATE_INITIAL:
-            prompt = build_initial_generation_prompt(self.problem_statement)
+            prompt = build_initial_generation_prompt(self.problem_statement, task_mode=self.task_mode)
         elif action.action_type == ActionType.FIX_BUG:
             prompt = build_reflection_prompt(
                 self.problem_statement,
                 node.state_code,
                 node.last_failure_reason or "No failure detail recorded.",
                 prior_attempts_summary=self._sibling_failure_notes(node),
+                task_mode=self.task_mode,
             )
         else:
             # ADD_HELPER_FUNCTION / OPTIMIZE / SYNTHESIZE_TEST_CASE share the
@@ -99,6 +112,7 @@ class MCTSSearch:
             prompt = build_reflection_prompt(
                 self.problem_statement, node.state_code,
                 f"Requested action: {action.action_type.value} -- {action.description}",
+                task_mode=self.task_mode,
             )
 
         response = await self.llm_client.complete(prompt.system_prompt, prompt.user_prompt)
@@ -142,7 +156,11 @@ class MCTSSearch:
             # option available for future expansion -- this is what keeps
             # the tree able to self-correct rather than dead-ending.
             if child.depth < self.max_tree_depth:
-                child.untried_actions = [Action(ActionType.FIX_BUG, f"fix: {report.first_failure.status.value if report.first_failure else 'unknown failure'}")]
+                status = report.first_failure.status.value if report.first_failure else "unknown failure"
+                child.untried_actions = [
+                    Action(ActionType.FIX_BUG, f"fix #{i}: {status}")
+                    for i in range(self.branching_factor)
+                ]
 
         child.backpropagate(reward)
 

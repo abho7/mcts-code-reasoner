@@ -14,6 +14,18 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+FUNCTION_SYSTEM_PROMPT = """You are an expert Python programmer performing iterative self-correction.
+You will be shown a Python function you previously wrote, the specification it must satisfy, and the
+exact test failure it produced. Produce the corrected FULL code (imports, any helpers, and the complete
+function definition with its original signature) that fixes the specific failure shown, without
+introducing regressions.
+
+Rules:
+- Output ONLY Python source code, no markdown fences, no commentary.
+- Do not read stdin, do not print, and do not include test code.
+- Fix the root cause shown in the failure, not just its symptom.
+"""
+
 SYSTEM_PROMPT = """You are an expert competitive programmer performing iterative self-correction.
 You will be shown a Python program you previously wrote, the problem it's meant to solve, and the
 exact execution failure it produced. Your job is to produce a corrected FULL program (not a diff,
@@ -38,6 +50,7 @@ def build_reflection_prompt(
     previous_code: str,
     failure_summary: str,
     prior_attempts_summary: str | None = None,
+    task_mode: str = "stdio",
 ) -> ReflectionPrompt:
     """
     prior_attempts_summary: optional short note on what earlier branches
@@ -57,12 +70,20 @@ def build_reflection_prompt(
     sections.append("## Task\nProduce the corrected full program.")
 
     return ReflectionPrompt(
-        system_prompt=SYSTEM_PROMPT,
+        system_prompt=FUNCTION_SYSTEM_PROMPT if task_mode == "function" else SYSTEM_PROMPT,
         user_prompt="\n\n".join(sections),
     )
 
 
-def build_initial_generation_prompt(problem_statement: str) -> ReflectionPrompt:
+def build_initial_generation_prompt(problem_statement: str, task_mode: str = "stdio") -> ReflectionPrompt:
+    if task_mode == "function":
+        return ReflectionPrompt(
+            system_prompt="""You are an expert Python programmer. Given a function signature and docstring,
+produce the complete implementation: any imports, any helpers, and the full function definition with
+its original signature. Do not read stdin, do not print, and do not include tests.
+Output ONLY the Python source code, no markdown fences, no commentary.""",
+            user_prompt=f"## Specification\n{problem_statement.strip()}\n\n## Task\nProduce the complete implementation.",
+        )
     system_prompt = """You are an expert competitive programmer. Given a problem statement, produce a
 complete, correct Python program that reads from stdin and writes to stdout exactly as specified.
 Output ONLY the Python source code, no markdown fences, no commentary."""

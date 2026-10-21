@@ -96,3 +96,24 @@ def test_tokens_spent_is_tracked_across_iterations():
     _run(search.run())
     assert search.tokens_spent > 0
     assert search.tokens_remaining == search.total_token_budget - search.tokens_spent
+
+
+def test_branching_factor_builds_a_real_tree():
+    """With k=2 the root gets two independent first drafts (siblings), so
+    UCB actually chooses between branches instead of walking a chain."""
+    buggy_a = "a, b = map(int, input().split())\nprint(a - b)"
+    buggy_b = "a, b = map(int, input().split())\nprint(a * b)"
+    fixed = "a, b = map(int, input().split())\nprint(a + b)"
+    fake_llm = FakeLLMClient(scripted_responses=[buggy_a, buggy_b, fixed])
+    search = MCTSSearch(
+        llm_client=fake_llm,
+        executor=CodeExecutor(SandboxLimits(timeout_seconds=1.0)),
+        problem_statement="Read two integers a and b from stdin, print a + b.",
+        test_cases=[{"id": "t1", "stdin": "2 3", "expected_stdout": "5"}],
+        max_iterations=10,
+        branching_factor=2,
+    )
+    result = _run(search.run())
+    assert len(search.root.children) == 2
+    assert result.is_terminal and result.depth == 2
+    assert search.iterations_run == 3
