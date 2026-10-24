@@ -23,7 +23,7 @@ and a four-phase production roadmap.
 This matters enough to say plainly rather than let a passing test suite
 imply more than it does:
 
-**Fully implemented and tested (17/17 tests passing, zero external
+**Fully implemented and tested (18/18 tests passing, zero external
 dependencies required):**
 - The sandboxed executor (`execution/sandbox.py`) — tested against a
   real infinite loop (confirmed killed by the wall-clock timeout, not
